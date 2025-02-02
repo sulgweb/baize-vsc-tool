@@ -3,6 +3,7 @@ import { ConfigProvider, App, theme } from 'antd';
 import zhCN from 'antd/es/locale/zh_CN';
 import './index.module.less';
 import MainRouter from './router';
+import AppMenu from './components/AppMenu';
 
 const BaseApp = () => {
   return (
@@ -14,7 +15,14 @@ const BaseApp = () => {
       locale={zhCN}
     >
       <App>
-        <MainRouter />
+        <div styleName='base-app'>
+          <AppMenu />
+          <div styleName='right'>
+            <MainRouter />
+          </div>
+
+        </div>
+
       </App>
     </ConfigProvider>
   );

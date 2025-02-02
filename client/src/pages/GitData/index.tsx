@@ -38,6 +38,17 @@ export default function GitData() {
     });
   };
 
+  // 设置vsc配置
+  const setVscConfig = ({
+    key, value
+  }) => {
+    vscode.postMessage({
+      command: "setVscConfig",
+      key,
+      value
+    })
+  }
+
   const handleListenMessage = (event) => {
     const messageRes = event.data;
     console.log('message', message);
@@ -61,6 +72,8 @@ export default function GitData() {
             message.error(messageRes.data);
           }
         },
+        vscSetConfigResult: () => {
+        }
       };
       commandFuncMap[messageRes.command]?.();
     }
