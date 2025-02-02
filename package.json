@@ -16,10 +16,6 @@
       {
         "command": "extension.helloWorld",
         "title": "Hello World"
-      },
-      {
-        "command": "extension.openWebview",
-        "title": "baize"
       }
     ]
   },

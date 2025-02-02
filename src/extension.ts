@@ -29,15 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  const HelloDisposable = vscode.commands.registerCommand(
-    "extension.helloWorld",
-    () => {
-      vscode.window.showInformationMessage("Hello World from baize-vsc-tool!");
-    }
-  );
-
   context.subscriptions.push(openWebviewDisposable);
-  context.subscriptions.push(HelloDisposable);
 }
 
 export function deactivate() { }
