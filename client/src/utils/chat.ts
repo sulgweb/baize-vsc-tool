@@ -1,9 +1,10 @@
 const baseUrl = 'https://api.dify.ai/v1';
-const apiToken = '你的api key';
+const apiToken = '你的api 秘钥';
+const chatUrl = `${baseUrl}/completion-messages`
 
 // 通用 gpt 的调用方式
 export const fetchChatSSE = ({ params, callback, onEnd }) => {
-  return fetch(baseUrl, {
+  return fetch(chatUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -43,11 +44,11 @@ export const fetchChatSSE = ({ params, callback, onEnd }) => {
         })
         .filter((item) => item);
       const curAnswer = answerList
-        .map((item) =>
-          item.choices.map((choice) => choice.delta.content).join('')
-        )
+        .filter((item) => item.event === 'message')
+        .map((item) => item.answer)
         .join('');
       answer += curAnswer ? curAnswer : '';
+      console.log("answer:", answer)
 
       callback(answer, conversation_id, task_id);
       return reader.read().then(process);

@@ -67,21 +67,14 @@ export default function GitData() {
   const handleSummary = () => {
     fetchChatSSE({
       params: {
-        messages: [
-          {
-            role: 'system',
-            content: '帮我总结一下commit内容',
-          },
-          {
-            role: 'user',
-            content: commitValue,
-          },
-        ],
+        inputs: {
+          query: commitValue
+        }
       },
       callback: (data) => {
         setSummaryValue(data);
       },
-      onEnd: () => {},
+      onEnd: () => { },
     });
   };
 
