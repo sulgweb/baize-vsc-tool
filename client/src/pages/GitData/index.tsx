@@ -27,6 +27,8 @@ export default function GitData() {
       command: 'getGitBranchList',
     });
   };
+
+  // 获取git commit记录
   const getGitData = () => {
     vscode.postMessage({
       command: 'getGitData',
@@ -52,7 +54,7 @@ export default function GitData() {
           );
           setBranchValue(branchList[0]);
         },
-        vscodeCopyTextResult: () => {
+        vscCopyTextResult: () => {
           if (messageRes.data === '复制成功') {
             message.success(messageRes.data);
           } else {

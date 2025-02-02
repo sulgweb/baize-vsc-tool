@@ -27,13 +27,13 @@ export const handleReceiveMessage = async (data, panel) => {
         vscode.env.clipboard.writeText(rest.data);
         panel.webview.postMessage({
           message: 'vscodeWebviewPostMessage',
-          command: 'vscodeCopyTextResult',
+          command: 'vscCopyTextResult',
           data: '复制成功',
         });
       } catch (e) {
         panel.webview.postMessage({
           message: 'vscodeWebviewPostMessage',
-          command: 'vscodeCopyTextResult',
+          command: 'vscCopyTextResult',
           data: '复制失败',
         });
       }
