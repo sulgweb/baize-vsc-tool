@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Select, DatePicker, Input, App } from 'antd';
-import { vscode } from '@/utils/webview';
+import { asyncPostMessage } from '@/utils/webview';
 import dayjs, { Dayjs } from 'dayjs';
 import { fetchChatSSE } from '@/utils/chat';
 import AppMarkdown from '@/components/AppMarkdown';
@@ -12,100 +12,86 @@ const { RangePicker } = DatePicker;
 
 export default function GitData() {
   const [timeValue, setTimeValue] = useState<[Dayjs, Dayjs]>([
-    dayjs().subtract(7, 'day'),
+    dayjs().subtract(30, 'day'),
     dayjs(),
   ]);
   const [branchValue, setBranchValue] = useState('');
   const [branchList, setBranchList] = useState([]);
+  const [userNameList, setUserNameList] = useState([]);
+  const [currentUserName, setCurrentUserName] = useState('');
   const [commitValue, setCommitValue] = useState('');
   const [summaryValue, setSummaryValue] = useState('');
 
   const { message } = App.useApp();
 
-  const initBranchList = () => {
-    vscode.postMessage({
+  // 初始化分支列表
+  const initBranchList = async () => {
+    const res = await asyncPostMessage({
       command: 'getGitBranchList',
     });
+    const branchList = res.data;
+    setBranchList(branchList.map((item) => ({ label: item, value: item })));
+    setBranchValue(branchList[0]);
+  };
+
+  // 初始化用户列表
+  const initUserNameList = async () => {
+    const namesRes = await asyncPostMessage({
+      command: 'getGitAllUserNames',
+    });
+    const authorRes = await asyncPostMessage({
+      command: 'getGitUserName',
+    });
+    setUserNameList(
+      namesRes.data.map((item) => ({ label: item, value: item }))
+    );
+    setCurrentUserName(
+      namesRes.data.includes(authorRes.data) ? authorRes.data : namesRes.data[0]
+    );
   };
 
   // 获取git commit记录
-  const getGitData = () => {
-    vscode.postMessage({
+  const getGitData = async () => {
+    const res = await asyncPostMessage({
       command: 'getGitData',
       startTime: timeValue[0].format('YYYY-MM-DD'),
       endTime: timeValue[1].format('YYYY-MM-DD'),
+      author: currentUserName,
       branch: branchValue,
     });
+    setCommitValue(res.data.join('\n'));
   };
 
-  // 设置vsc配置
-  const setVscConfig = ({
-    key, value
-  }) => {
-    vscode.postMessage({
-      command: "setVscConfig",
-      key,
-      value
-    })
-  }
-
-  const handleListenMessage = (event) => {
-    const messageRes = event.data;
-    console.log('message', message);
-    if (messageRes.message === 'vscodeWebviewPostMessage') {
-      const commandFuncMap = {
-        getGitDataResult: () => {
-          const _commitValue = messageRes.data.join('\n');
-          setCommitValue(_commitValue);
-        },
-        getGitBranchListResult: () => {
-          const branchList = messageRes.data;
-          setBranchList(
-            branchList.map((item) => ({ label: item, value: item }))
-          );
-          setBranchValue(branchList[0]);
-        },
-        vscCopyTextResult: () => {
-          if (messageRes.data === '复制成功') {
-            message.success(messageRes.data);
-          } else {
-            message.error(messageRes.data);
-          }
-        },
-        vscSetConfigResult: () => {
-        }
-      };
-      commandFuncMap[messageRes.command]?.();
-    }
-  };
-
+  // AI总结
   const handleSummary = () => {
     fetchChatSSE({
       params: {
         inputs: {
-          query: commitValue
-        }
+          query: commitValue,
+        },
       },
       callback: (data) => {
         setSummaryValue(data);
       },
-      onEnd: () => { },
+      onEnd: () => {},
     });
   };
 
-  const copyText = () => {
-    vscode.postMessage({
+  const copyText = async () => {
+    const res = await asyncPostMessage({
       command: 'vscodeCopyText',
       data: summaryValue,
     });
+    if (res.data === '复制成功') {
+      message.success(res.data);
+    } else {
+      message.error(res.data);
+    }
   };
 
   useEffect(() => {
     initBranchList();
-    window.addEventListener('message', handleListenMessage);
-    return () => {
-      window.removeEventListener('message', handleListenMessage);
-    };
+    initUserNameList();
   }, []);
   return (
     <div styleName="git-data">
@@ -117,6 +103,13 @@ export default function GitData() {
           value={branchValue}
           onChange={setBranchValue}
           loading={!branchList.length}
+        />
+        <Select
+          style={{ width: 120, marginRight: 8 }}
+          options={userNameList}
+          value={currentUserName}
+          onChange={setCurrentUserName}
+          loading={!userNameList.length}
         />
         <RangePicker
           value={timeValue}

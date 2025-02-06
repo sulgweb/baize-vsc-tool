@@ -1,13 +1,15 @@
-import { HashRouter, Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import GitData from '../pages/GitData';
+import Setting from '../pages/Setting';
 
-
-const MainRouter = () =>{
-  return <HashRouter>
+const MainRouter = () => {
+  return (
     <Routes>
-      <Route path='/' element={<GitData />}></Route>
+      <Route path="/git-data" element={<GitData />} />
+      <Route path="/setting" element={<Setting />} />
+      <Route path="*" element={<Navigate to="/git-data" />} />
     </Routes>
-  </HashRouter>
-}
+  );
+};
 
-export default MainRouter
+export default MainRouter;

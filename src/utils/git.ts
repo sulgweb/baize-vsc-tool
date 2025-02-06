@@ -15,6 +15,30 @@ export const getGitUserName = async () => {
   });
 };
 
+export const getGitAllUserNames = async () => {
+  console.log('getGitAllUserNames');
+  return new Promise((resolve, reject) => {
+    exec(
+      `git log --format="%aN" | sort -u`,
+      { cwd: workspacePath },
+      (err, stdout) => {
+        if (err) {
+          reject(err);
+        }
+        console.log('stdout', stdout);
+        if (stdout) {
+          const userNames = stdout
+            .trim()
+            .split('\n')
+            .map((item) => item.trim());
+          console.log('userNames', userNames);
+          resolve(userNames);
+        }
+      }
+    );
+  });
+};
+
 export const getGitBranchList = async () => {
   return new Promise((resolve, reject) => {
     exec(
@@ -51,7 +75,6 @@ export const getGitBranchList = async () => {
 export const getGitCommit = async ({ author, branch, startTime, endTime }) => {
   return new Promise((resolve, reject) => {
     const command = `git log ${branch} --author="${author}" --since="${startTime}" --until="${endTime}" --pretty=format:"%s" -n 10000`;
-    console.log('command', command);
     exec(command, { cwd: workspacePath }, (error, stdout, stderr) => {
       if (error) {
         reject(stderr);

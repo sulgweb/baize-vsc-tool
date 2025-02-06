@@ -1,11 +1,28 @@
-const baseUrl = 'https://api.dify.ai/v1';
-const apiToken = '你的api 秘钥';
-const chatUrl = `${baseUrl}/completion-messages`
+import { asyncPostMessage } from './webview';
+
+const getApiToken = async () => {
+  const res = await asyncPostMessage({
+    command: 'vscGetSetting',
+  });
+  return res.data.apiKey;
+};
+
+const getDifyUrl = async () => {
+  const res = await asyncPostMessage({
+    command: 'vscGetSetting',
+  });
+  return res.data.difyUrl;
+};
 
 // 通用 gpt 的调用方式
-export const fetchChatSSE = ({ params, callback, onEnd }) => {
+export const fetchChatSSE = async ({ params, callback, onEnd }) => {
+  const apiToken = await getApiToken();
+  const difyUrl = await getDifyUrl();
+
+  const chatUrl = `${difyUrl}/completion-messages`;
   return fetch(chatUrl, {
     method: 'POST',
+    mode: 'cors',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${apiToken}`,
@@ -48,7 +65,7 @@ export const fetchChatSSE = ({ params, callback, onEnd }) => {
         .map((item) => item.answer)
         .join('');
       answer += curAnswer ? curAnswer : '';
-      console.log("answer:", answer)
+      console.log('answer:', answer);
 
       callback(answer, conversation_id, task_id);
       return reader.read().then(process);

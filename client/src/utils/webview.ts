@@ -33,30 +33,21 @@ if (process.env.NODE_ENV === 'development') {
   vscode = acquireVsCodeApi();
 }
 
-const setGlobalState = (data) => {
-  parent.window.postMessage(
-    {
-      message: 'vscodePostMessage',
-      data: {
-        command: 'setGlobalState',
-        data,
-      },
-    },
-    '*'
-  );
+const asyncPostMessage = (data): Promise<any> => {
+  return new Promise((resolve, reject) => {
+    vscode.postMessage(data);
+    const handleListenMessage = (e) => {
+      const { message } = e.data;
+      if (
+        message === 'vscodeWebviewPostMessage' &&
+        e.data.command === data.command
+      ) {
+        resolve(e.data);
+        window.removeEventListener('message', handleListenMessage);
+      }
+    };
+    window.addEventListener('message', handleListenMessage);
+  });
 };
 
-const getGlobalState = (data) => {
-  parent.window.postMessage(
-    {
-      message: 'vscodePostMessage',
-      data: {
-        command: 'getGlobalState',
-        data,
-      },
-    },
-    '*'
-  );
-};
-
-export { vscode, setGlobalState, getGlobalState };
+export { asyncPostMessage };

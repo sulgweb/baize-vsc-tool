@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 export function getWebViewContent(context, templatePath, panel) {
-  console.log("context----->", context)
+  console.log('context----->', context);
   const resourcePath = path.join(context.extensionPath, templatePath);
   const dirPath = path.dirname(resourcePath);
   let htmlIndexPath = fs.readFileSync(resourcePath, 'utf-8');
@@ -21,14 +21,14 @@ export function getWebViewContent(context, templatePath, panel) {
   return html;
 }
 
-export const loadWebViewHtml = (panel) => {
+export const loadWebViewHtml = (context, panel) => {
   // 判断是否在开发环境下
-  const isDev = process.env.NODE_ENV !== 'development';
+  const isDev = process.env.NODE_ENV === 'development';
   if (isDev) {
     // 开发环境：加载本地的 5173 端口
     panel.webview.html = `<html>
-<body>
-<iframe id="iframe" src="http://localhost:5173" style="width: 100%; height: 100vh; border: none;"></iframe>
+<body style="overflow: hidden;">
+<iframe id="iframe" src="http://localhost:5173" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" allow="clipboard-read;clipboard-write;" style="width: 100%; height: 100vh; border: none;"></iframe>
 <script>
   const vscode = acquireVsCodeApi();
   console.log('vscode', vscode);
@@ -43,7 +43,6 @@ export const loadWebViewHtml = (panel) => {
     }else if(event.data.message === 'vscodeGetState'){
       vscode.getState(data);
     }
-
     // 接收来自 vscode 的消息
     if(['vscodeWebviewPostMessage', 'vscodeWebviewSetState', 'vscodeWebviewGetState'].includes(event.data.message)){
       iframe.postMessage(event.data, '*');
@@ -55,7 +54,7 @@ export const loadWebViewHtml = (panel) => {
 `;
   } else {
     // 生产环境：加载编译后的 HTML 文件
-    const htmlDoc = getWebViewContent(context, 'out/index.html', panel);
+    const htmlDoc = getWebViewContent(context, 'client/dist/index.html', panel);
     panel.webview.html = htmlDoc;
   }
 };
