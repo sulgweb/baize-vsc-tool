@@ -11,6 +11,9 @@
   "categories": [
     "Other"
   ],
+  "repository": {
+    "url": "https://github.com/sulgweb/baize-vsc-tool"
+  },
   "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
