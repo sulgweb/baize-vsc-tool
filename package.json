@@ -2,10 +2,12 @@
   "name": "baize-vsc-tool",
   "displayName": "baize-vsc-tool",
   "description": "",
+  "publisher": "xiaoyu",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.96.0"
   },
+  "icon": "icon.png",
   "categories": [
     "Other"
   ],
@@ -14,10 +16,26 @@
   "contributes": {
     "commands": [
       {
-        "command": "extension.helloWorld",
-        "title": "Hello World"
+        "command": "extension.openWebview",
+        "title": "baize:git summarize"
       }
-    ]
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Baize Settings",
+      "properties": {
+        "baize.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API Key for Dify integration"
+        },
+        "baize.difyUrl": {
+          "type": "string",
+          "default": "https://api.dify.ai/v1",
+          "description": "Base URL for Dify API"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "pnpm run compile",
